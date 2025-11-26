@@ -32,38 +32,48 @@ Sistema de distribuição automática de tickets baseado em **Teams**, **Agents*
 
 ```
 src/
-  core/
+  events/
     eventBus.js
-  domain/
-    entities/
-      Ticket.js
-      Agent.js
-      Team.js
-    factories/
-      TicketFactory.js
-      AgentFactory.js
-      TeamFactory.js
-  application/
-    services/
-      TicketService.js
-      AutoDistributionService.js
-  infrastructure/
-    http/
-      routes/
-        ticketRoutes.js
-      server.js
+  modules/
+    agent/
+      agent.entity.ts
+      agent.listener.ts
+      agent.repository.ts
+      agent.schema.ts
+      agent.service.ts
+    team/
+      team.entity.ts
+      team.repository.ts
+      team.schema.ts
+      team.service.ts
+    ticket/
+      ticket.entity.ts
+      ticket.listener.ts
+      ticket.repository.ts
+      ticket.schema.ts
+      ticket.service.ts
+  routes/
+    agents.routes.ts
+    teams.routes.ts
+    tickets.routes.ts
+  app.ts
 
 __tests__/
-  unit/
-    eventBus.mock.js
-    TicketFactory.test.js
-    AgentFactory.test.js
-    TeamFactory.test.js
-    eventEmission.test.js
-    listeners.test.js
-  integration/
-    autoDistribution.test.js
-    ticketFlow.test.js
+  agent/
+    agent.listener.test.ts
+    agent.repository.test.ts
+    agent.routes.test.ts
+    agent.service.test.ts
+  team/
+    team.repository.test.ts
+    team.routes.test.ts
+    team.service.test.ts
+  ticket/
+    ticket.listener.test.ts
+    ticket.repository.test.ts
+    ticket.routes.test.ts
+    ticket.service.test.ts
+
 ```
 
 ---
