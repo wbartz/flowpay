@@ -28,7 +28,6 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0"
   },
-  "module": "index.ts",
   "name": "flowpay",
   "peerDependencies": {
     "typescript": "^5"
