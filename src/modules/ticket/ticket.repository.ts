@@ -8,7 +8,13 @@ class TicketRepository {
   async create(data: Omit<Ticket, 'id'>): Promise<Ticket> {
     const id = crypto.randomUUID()
     const number = this.idCounter++
-    const ticket: Ticket = { ...data, id, number, agentId: null }
+    const ticket: Ticket = {
+      ...data,
+      id,
+      number,
+      agentId: null,
+      createdAt: new Date(),
+    }
 
     this.tickets.set(id, ticket)
     this.queue.push(id)
