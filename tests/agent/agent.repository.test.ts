@@ -1,6 +1,12 @@
-import { agentRepository } from '@/modules/agent/agent.repository'
+import { AgentRepository } from '@/modules/agent/agent.repository'
 
 describe('AgentRepository', () => {
+  let agentRepository: AgentRepository
+
+  beforeEach(() => {
+    agentRepository = new AgentRepository()
+  })
+
   beforeEach(() => {
     ;(agentRepository as any).agents.clear()
     ;(agentRepository as any).idCounter = 1

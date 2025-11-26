@@ -1,11 +1,22 @@
 import type { Agent } from './agent.entity'
 
-class AgentRepository {
+export class AgentRepository {
   private agents = new Map<string, Agent>()
 
-  async create(data: Omit<Agent, 'id'>): Promise<Agent> {
+  async create(
+    data: Omit<
+      Agent,
+      'id' | 'createdAt' | 'assignedTickets' | 'teamId' | 'maxTickets'
+    >,
+  ): Promise<Agent> {
     const id = crypto.randomUUID()
-    const agent: Agent = { id, ...data, createdAt: new Date() }
+    const agent: Agent = {
+      id,
+      ...data,
+      createdAt: new Date(),
+      maxTickets: 3,
+      assignedTickets: [],
+    }
     this.agents.set(id, agent)
     return agent
   }
@@ -28,6 +39,12 @@ class AgentRepository {
 
   async delete(id: string): Promise<boolean> {
     return this.agents.delete(id)
+  }
+
+  async getAvailableAgents(): Promise<Agent[]> {
+    return Array.from(this.agents.values()).filter(
+      (agent) => agent.assignedTickets.length < agent.maxTickets,
+    )
   }
 }
 

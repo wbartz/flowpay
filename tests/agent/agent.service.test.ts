@@ -1,6 +1,7 @@
 import { EventBus } from '@/events/eventBus'
 import { AgentService } from '@/modules/agent/agent.service'
 import { agentRepository } from '@/modules/agent/agent.repository'
+import type { Agent } from '@/modules/agent/agent.entity'
 
 jest.mock('@/modules/agent/agent.repository', () => ({
   agentRepository: {
@@ -14,29 +15,37 @@ jest.mock('@/modules/agent/agent.repository', () => ({
 describe('AgentService', () => {
   let eventBus: EventBus
   let service: AgentService
+  let defaultAgent: Agent
 
   beforeEach(() => {
     jest.clearAllMocks()
     eventBus = new EventBus()
     service = new AgentService(eventBus)
+    defaultAgent = {
+      id: '1',
+      name: 'Ana',
+      teamId: null,
+      maxTickets: 3,
+      assignedTickets: [],
+      createdAt: new Date(),
+    }
   })
 
   test('cria agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
-    ;(agentRepository.create as jest.Mock).mockResolvedValue({
-      id: '1',
-      name: 'Ana',
-    })
+    ;(agentRepository.create as jest.Mock).mockResolvedValue(defaultAgent)
 
-    const agent = await service.create({ name: 'Ana' })
+    const agent = await service.create(defaultAgent)
+
     expect(agent.id).toBe('1')
     expect(publishSpy).toHaveBeenCalledWith('agent.created', agent)
   })
 
   test('atualiza agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
+    ;(agentRepository.getById as jest.Mock).mockResolvedValue(defaultAgent)
     ;(agentRepository.update as jest.Mock).mockResolvedValue({
-      id: '1',
+      ...defaultAgent,
       name: 'Ana B',
     })
 
@@ -47,18 +56,12 @@ describe('AgentService', () => {
 
   test('deleta agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
-    ;(agentRepository.getById as jest.Mock).mockResolvedValue({
-      id: '1',
-      name: 'Ana',
-    })
+    ;(agentRepository.getById as jest.Mock).mockResolvedValue(defaultAgent)
     ;(agentRepository.delete as jest.Mock).mockResolvedValue(true)
 
     const result = await service.delete('1')
     expect(result).toBe(true)
-    expect(publishSpy).toHaveBeenCalledWith('agent.deleted', {
-      id: '1',
-      name: 'Ana',
-    })
+    expect(publishSpy).toHaveBeenCalledWith('agent.deleted', defaultAgent)
   })
 
   test('deleta agente inexistente retorna false', async () => {

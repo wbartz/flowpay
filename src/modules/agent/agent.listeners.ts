@@ -1,5 +1,5 @@
 // src/modules/agent/agent.listeners.ts
-import { EventBus } from '../../core/eventBus'
+import { EventBus } from '@/events/eventBus'
 import { AgentService } from './agent.service'
 
 export class AgentListeners {
