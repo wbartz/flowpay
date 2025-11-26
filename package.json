@@ -1,9 +1,15 @@
 {
+  "author": {
+    "email": "Williamf.brtz@gmail.com",
+    "name": "William Bartz"
+  },
   "dependencies": {
     "@faker-js/faker": "^10.1.0",
+    "cors": "^2.8.5",
     "express": "^4.19.0",
     "zod": "^4.1.13"
   },
+  "description": "Sistema de distribuição automática de tickets entre times e agentes",
   "devDependencies": {
     "@types/bun": "latest",
     "@types/express": "^4.17.21",
@@ -29,12 +35,14 @@
   },
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "dev": "ts-node-dev src/index.ts",
+    "build": "bun build src/app.ts --outdir dist --target bun",
+    "dev": "bun run --hot src/app.ts",
     "lint": "eslint . --ext .ts,.tsx",
-    "start": "node dist/index.js",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+    "start": "bun run dist/app.js",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "test:watch": "bun test --watch"
   },
-  "type": "module"
+  "type": "module",
+  "version": "1.0.0"
 }

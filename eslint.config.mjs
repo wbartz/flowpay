@@ -7,6 +7,10 @@ import jest from 'eslint-plugin-jest';
 export default [
   js.configs.recommended,
   {
+    env: {
+      node: true,
+      commonjs: true
+    },
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tsparser,
