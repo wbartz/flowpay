@@ -3,10 +3,10 @@ import type { Team } from './team.entity'
 export class TeamRepository {
   private teams: Team[] = []
 
-  async create(name: string): Promise<Team> {
+  async create(data: Omit<Team, 'id' | 'agents' | 'createdAt'>): Promise<Team> {
     const team: Team = {
       id: crypto.randomUUID(),
-      name,
+      name: data.name,
       agents: [],
       createdAt: new Date(),
     }
@@ -28,3 +28,5 @@ export class TeamRepository {
     return team
   }
 }
+
+export const teamRepository = new TeamRepository()

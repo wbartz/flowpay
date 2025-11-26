@@ -1,11 +1,12 @@
 import { TeamRepository } from './team.repository'
 import type { Team } from './team.entity'
+import type { CreateTeamDTO } from './team.schema'
 
 export class TeamService {
   constructor(private repo: TeamRepository) {}
 
-  async createTeam(name: string): Promise<Team> {
-    return this.repo.create(name)
+  async createTeam(data: CreateTeamDTO): Promise<Team> {
+    return this.repo.create(data)
   }
 
   async listTeams(): Promise<Team[]> {
