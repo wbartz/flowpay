@@ -29,11 +29,12 @@ describe('AgentService', () => {
       assignedTickets: [],
       createdAt: new Date(),
     }
+    ;(agentRepository.getById as jest.Mock).mockResolvedValue(defaultAgent)
+    ;(agentRepository.create as jest.Mock).mockResolvedValue(defaultAgent)
   })
 
   test('cria agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
-    ;(agentRepository.create as jest.Mock).mockResolvedValue(defaultAgent)
 
     const agent = await service.create(defaultAgent)
 
@@ -43,7 +44,7 @@ describe('AgentService', () => {
 
   test('atualiza agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
-    ;(agentRepository.getById as jest.Mock).mockResolvedValue(defaultAgent)
+
     ;(agentRepository.update as jest.Mock).mockResolvedValue({
       ...defaultAgent,
       name: 'Ana B',
@@ -56,7 +57,6 @@ describe('AgentService', () => {
 
   test('deleta agente e emite evento', async () => {
     const publishSpy = jest.spyOn(eventBus, 'publish')
-    ;(agentRepository.getById as jest.Mock).mockResolvedValue(defaultAgent)
     ;(agentRepository.delete as jest.Mock).mockResolvedValue(true)
 
     const result = await service.delete('1')

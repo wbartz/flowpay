@@ -26,6 +26,7 @@ describe('AgentListeners atualizado', () => {
       maxTickets: 3,
       createdAt: new Date(),
     }
+    agentService.getById.mockResolvedValue(defaultAgent)
   })
 
   test('team.created dispara log mas não altera agente', async () => {
@@ -34,8 +35,6 @@ describe('AgentListeners atualizado', () => {
   })
 
   test('team.updated atualiza agentes corretos', async () => {
-    agentService.getById.mockResolvedValue(defaultAgent)
-
     await eventBus.publish('team.updated', { id: 'T1', agents: ['A1'] })
     expect(agentService.update).toHaveBeenCalledWith('A1', { teamId: 'T1' })
   })
@@ -49,8 +48,6 @@ describe('AgentListeners atualizado', () => {
   })
 
   test('team.agent.removed atualiza agente removendo teamId', async () => {
-    agentService.getById.mockResolvedValue(defaultAgent)
-
     await eventBus.publish('team.agent.removed', {
       teamId: 'old',
       agentId: 'A1',
