@@ -4,6 +4,7 @@ export interface Ticket {
   subject: string
   description: string
   teamId?: string
+  agentId?: string | null
   status: 'queued' | 'assigned' | 'closed'
   createdAt: Date
 }
