@@ -1,41 +1,33 @@
 import type { Agent } from './agent.entity'
 
-export class AgentRepository {
-  private agents: Agent[] = []
+class AgentRepository {
+  private agents = new Map<string, Agent>()
 
-  async create(data: Partial<Agent>): Promise<Agent> {
-    const agent: Agent = {
-      id: crypto.randomUUID(),
-      name: data.name || 'unknown',
-      teamId: data.teamId,
-      capacity: data.capacity ?? 3,
-      assignedTickets: [],
-      createdAt: new Date(),
-    }
-    this.agents.push(agent)
+  async create(data: Omit<Agent, 'id'>): Promise<Agent> {
+    const id = crypto.randomUUID()
+    const agent: Agent = { id, ...data, createdAt: new Date() }
+    this.agents.set(id, agent)
     return agent
+  }
+
+  async getById(id: string): Promise<Agent | null> {
+    return this.agents.get(id) ?? null
+  }
+
+  async update(id: string, data: Partial<Agent>): Promise<Agent | null> {
+    const agent = this.agents.get(id)
+    if (!agent) return null
+    const updated = { ...agent, ...data }
+    this.agents.set(id, updated)
+    return updated
   }
 
   async list(): Promise<Agent[]> {
-    return this.agents
+    return Array.from(this.agents.values())
   }
 
-  async findById(id: string): Promise<Agent | undefined> {
-    return this.agents.find((a) => a.id === id)
-  }
-
-  async update(agent: Agent): Promise<Agent> {
-    const idx = this.agents.findIndex((a) => a.id === agent.id)
-    if (idx !== -1) this.agents[idx] = agent
-    return agent
-  }
-
-  async remove(id: string): Promise<Agent | null | any> {
-    const idx = this.agents.findIndex((a) => a.id === id)
-    if (idx === -1) return null
-    const removed = this.agents[idx]
-    this.agents.splice(idx, 1)
-    return removed
+  async delete(id: string): Promise<boolean> {
+    return this.agents.delete(id)
   }
 }
 

@@ -1,53 +1,42 @@
-import { AgentRepository } from './agent.repository'
+import { agentRepository } from './agent.repository'
+import { EventBus } from '@/events/eventBus'
 import type { Agent } from './agent.entity'
 
 export class AgentService {
-  constructor(private repo: AgentRepository) {}
+  constructor(private eventBus: EventBus) {}
 
-  async createAgent(data: {
-    name: string
-    teamId?: string
-    capacity?: number
-  }): Promise<Agent> {
-    return this.repo.create(data)
-  }
-
-  async listAgents(): Promise<Agent[]> {
-    return this.repo.list()
-  }
-
-  async getAgent(id: string): Promise<Agent | null> {
-    const a = await this.repo.findById(id)
-    return a ?? null
-  }
-
-  async removeAgent(id: string): Promise<Agent | null> {
-    return this.repo.remove(id)
-  }
-
-  async assignTicketToAgent(
-    agentId: string,
-    ticketId: string,
-  ): Promise<Agent | null> {
-    const agent = await this.repo.findById(agentId)
-    if (!agent) return null
-    if (agent.assignedTickets.length >= agent.capacity)
-      throw new Error('Agent at full capacity')
-    agent.assignedTickets.push(ticketId)
-    await this.repo.update(agent)
+  async create(data: Omit<Agent, 'id'>) {
+    const agent = await agentRepository.create(data)
+    await this.eventBus.publish('agent.created', agent)
     return agent
   }
 
-  async releaseTicketFromAgent(
-    agentId: string,
-    ticketId?: string,
-  ): Promise<string | null> {
-    const agent = await this.repo.findById(agentId)
-    if (!agent) return null
-    if (!ticketId) ticketId = agent.assignedTickets.shift()
-    const idx = agent.assignedTickets.findIndex((t) => t === ticketId)
-    if (idx !== -1) agent.assignedTickets.splice(idx, 1)
-    await this.repo.update(agent)
-    return ticketId ?? null
+  async update(id: string, data: Partial<Agent>) {
+    const updated = await agentRepository.update(id, data)
+    if (updated) {
+      await this.eventBus.publish('agent.updated', updated)
+    }
+    return updated
+  }
+
+  async getById(id: string) {
+    return agentRepository.getById(id)
+  }
+
+  async list() {
+    return agentRepository.list()
+  }
+
+  async delete(id: string) {
+    const agent = await this.getById(id)
+    if (!agent) return false
+
+    const deleted = await agentRepository.delete(id)
+    if (deleted) {
+      await this.eventBus.publish('agent.deleted', agent)
+    }
+    return deleted
   }
 }
+
+export const agentService = new AgentService(new EventBus())
