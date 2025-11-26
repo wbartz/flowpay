@@ -1,4 +1,5 @@
 import type { Ticket } from './ticket.entity'
+import crypto from 'crypto'
 
 class TicketRepository {
   private tickets = new Map<string, Ticket>()

@@ -30,7 +30,7 @@ describe('AgentRepository', () => {
     await agentRepository.create({ name: 'Ana' })
     await agentRepository.create({ name: 'Bruno' })
     const list = await agentRepository.list()
-    expect(list.length).toBe(2)
+    expect(list).toHaveLength(2)
   })
 
   test('deleta agente corretamente', async () => {

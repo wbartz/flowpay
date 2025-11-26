@@ -1,4 +1,5 @@
 import type { Team } from './team.entity'
+import crypto from 'crypto'
 
 export class TeamRepository {
   private teams = new Map<string, Team>()

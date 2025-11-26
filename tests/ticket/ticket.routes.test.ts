@@ -17,7 +17,7 @@ describe('Ticket Routes', () => {
     ;(ticketService.listQueue as jest.Mock).mockResolvedValue([{ id: 'T1' }])
     const res = await request(app).get('/tickets/queue')
     expect(res.status).toBe(200)
-    expect(res.body.length).toBe(1)
+    expect(res.body).toHaveLength(1)
     expect(res.body[0].id).toBe('T1')
   })
 

@@ -1,4 +1,5 @@
 import type { Agent } from './agent.entity'
+import crypto from 'crypto'
 
 export class AgentRepository {
   private agents = new Map<string, Agent>()

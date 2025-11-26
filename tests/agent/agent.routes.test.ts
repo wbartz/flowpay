@@ -42,7 +42,7 @@ describe('Agent Routes', () => {
     ;(agentRepository.list as jest.Mock).mockResolvedValue([{ id: 'A1' }])
     const res = await request(app).get('/agents')
     expect(res.status).toBe(200)
-    expect(res.body.length).toBe(1)
+    expect(res.body).toHaveLength(1)
   })
 
   test('PUT /agents/:id atualiza agente', async () => {

@@ -54,7 +54,7 @@ describe('TicketRepository', () => {
     await ticketRepository.create(ticketData)
     await ticketRepository.create({ subject: 'Outro', description: 'Desc' })
     const list = await ticketRepository.list()
-    expect(list.length).toBe(2)
+    expect(list).toHaveLength(2)
   })
 
   test('listQueue retorna tickets na ordem da fila', async () => {

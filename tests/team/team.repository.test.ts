@@ -31,7 +31,7 @@ describe('TeamRepository', () => {
     await teamRepository.create({ name: 'Outros', type: 'other' })
 
     const list = await teamRepository.list()
-    expect(list.length).toBe(2)
+    expect(list).toHaveLength(2)
   })
 
   test('remove time', async () => {

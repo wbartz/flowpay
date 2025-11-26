@@ -63,7 +63,7 @@ describe('Team Routes', () => {
     ;(teamRepository.list as jest.Mock).mockResolvedValue([{ id: 'T1' }])
     const res = await request(app).get('/teams')
     expect(res.status).toBe(200)
-    expect(res.body.length).toBe(1)
+    expect(res.body).toHaveLength(1)
   })
 
   test('PUT /teams/:id atualiza um time', async () => {
