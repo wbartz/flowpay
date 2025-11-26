@@ -5,14 +5,21 @@ class TicketRepository {
   private queue: string[] = []
   private idCounter = 1
 
-  async create(data: Omit<Ticket, 'id'>): Promise<Ticket> {
+  async create(
+    data: Omit<
+      Ticket,
+      'id' | 'number' | 'createdAt' | 'agentId' | 'status' | 'teamId'
+    >,
+  ): Promise<Ticket> {
     const id = crypto.randomUUID()
     const number = this.idCounter++
     const ticket: Ticket = {
       ...data,
       id,
       number,
+      teamId: null,
       agentId: null,
+      status: 'queued',
       createdAt: new Date(),
     }
 
@@ -55,17 +62,23 @@ class TicketRepository {
   }
 
   async unassignFromAgent(agentId: string): Promise<string[]> {
-    const freed: string[] = []
+    const free: string[] = []
 
     for (const ticket of this.tickets.values()) {
       if (ticket.agentId === agentId) {
         ticket.agentId = null
-        freed.push(ticket.id)
+        free.push(ticket.id)
         this.queue.unshift(ticket.id)
       }
     }
 
-    return freed
+    return free
+  }
+
+  async getUnassigned(): Promise<Ticket[]> {
+    return Array.from(this.tickets.values()).filter(
+      (ticket) => ticket.agentId === null,
+    )
   }
 }
 

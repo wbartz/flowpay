@@ -1,14 +1,17 @@
 // src/modules/ticket/ticket.service.ts
-import { EventBus } from '@/events/eventBus'
+import { eventBus, EventBus } from '@/events/eventBus'
 import { ticketRepository } from './ticket.repository'
-import { teamRepository } from '@/modules/team/team.repository'
-import { agentRepository } from '@/modules/agent/agent.repository'
 import type { Ticket } from './ticket.entity'
 
 export class TicketService {
   constructor(private eventBus: EventBus) {}
 
-  async create(data: Omit<Ticket, 'id'>) {
+  async create(
+    data: Omit<
+      Ticket,
+      'id' | 'number' | 'createdAt' | 'agentId' | 'status' | 'teamId'
+    >,
+  ) {
     const ticket = await ticketRepository.create(data)
 
     await this.eventBus.publish('ticket.created', {
@@ -19,37 +22,31 @@ export class TicketService {
     return ticket
   }
 
-  async autoDistribute(teamId: string) {
-    const team = await teamRepository.findById(teamId)
-    if (!team) return
-
-    const agents = await agentRepository.list()
-    const teamAgents = agents.filter((a) => a.teamId === teamId)
-
-    for (const agent of teamAgents) {
-      const assigned = (await ticketRepository.list()).filter(
-        (t) => t.agentId === agent.id,
-      )
-
-      if (assigned.length >= 3) continue
-
-      const nextTicket = await ticketRepository.popNext()
-      if (!nextTicket) return
-
-      await ticketRepository.update(nextTicket.id, {
-        agentId: agent.id,
-      })
-
-      await this.eventBus.publish('ticket.assigned', {
-        ticketId: nextTicket.id,
-        agentId: agent.id,
-        teamId,
-      })
-    }
+  async listQueue(): Promise<Ticket[]> {
+    return ticketRepository.listQueue()
   }
 
   async returnToQueue(ticketId: string) {
     await ticketRepository.returnToQueue(ticketId)
+  }
+
+  async getUnassigned(): Promise<Ticket[]> {
+    return ticketRepository.getUnassigned()
+  }
+
+  async assign(ticketId: string, agentId: string) {
+    const ticket = await ticketRepository.update(ticketId, {
+      agentId,
+      status: 'assigned',
+    })
+    if (!ticket) throw new Error('Ticket not found')
+
+    await this.eventBus.publish('ticket.assigned', {
+      ticketId: ticket.id,
+      agentId,
+    })
+
+    return ticket
   }
 
   async unassignAgent(agentId: string) {
@@ -64,4 +61,4 @@ export class TicketService {
   }
 }
 
-export const ticketService = new TicketService(new EventBus())
+export const ticketService = new TicketService(eventBus)

@@ -3,7 +3,7 @@ export interface Ticket {
   number: number // sequential queue number
   subject: string
   description: string
-  teamId?: string
+  teamId?: string | null
   agentId?: string | null
   status: 'queued' | 'assigned' | 'closed'
   createdAt: Date

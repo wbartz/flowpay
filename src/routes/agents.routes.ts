@@ -22,6 +22,15 @@ router.get('/', async (_req, res) => {
   res.json(agents)
 })
 
+router.get('/:id', async (req, res) => {
+  try {
+    const agents = await agentService.getById(req.params.id)
+    res.json(agents)
+  } catch (err: any) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
 router.put('/:id', async (req, res) => {
   try {
     const data = CreateAgentSchema.parse(req.body)
@@ -45,7 +54,7 @@ router.delete('/:id', async (req, res) => {
       action: 'removed',
       agent: removed,
     })
-    res.json(removed)
+    res.status(204).json(removed)
   } catch (err: any) {
     res.status(400).json({ error: err.message })
   }

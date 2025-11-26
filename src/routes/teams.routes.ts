@@ -48,7 +48,7 @@ router.delete('/:id/agents/:agentId', async (req, res) => {
       req.params.id,
       req.params.agentId,
     )
-    res.json(team)
+    res.status(204).json(team)
   } catch (err: any) {
     res.status(400).json({ error: err.message })
   }

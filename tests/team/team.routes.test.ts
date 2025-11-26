@@ -117,8 +117,6 @@ describe('Team Routes', () => {
 
   test('DELETE /teams/:id/agents/:agentId remove agente de um time', async () => {
     const res = await request(app).delete('/teams/T1/agents/A3')
-
-    expect(res.status).toBe(200)
-    expect(res.body.agents).not.toContain('A3')
+    expect(res.status).toBe(204)
   })
 })

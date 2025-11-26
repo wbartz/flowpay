@@ -1,75 +1,100 @@
-// tests/ticket/ticket.service.test.ts
-import { TicketRepository } from '@/modules/ticket/ticket.repository'
+import { EventBus } from '@/events/eventBus'
 import { TicketService } from '@/modules/ticket/ticket.service'
-import { faker } from '@faker-js/faker'
+import { ticketRepository } from '@/modules/ticket/ticket.repository'
+
+jest.mock('@/modules/ticket/ticket.repository', () => ({
+  ticketRepository: {
+    create: jest.fn(),
+    update: jest.fn(),
+    getById: jest.fn(),
+    list: jest.fn(),
+    listQueue: jest.fn(),
+    popNext: jest.fn(),
+    returnToQueue: jest.fn(),
+    unassignFromAgent: jest.fn(),
+    getUnassigned: jest.fn(),
+  },
+}))
 
 describe('TicketService', () => {
-  let repo: TicketRepository
+  let eventBus: EventBus
   let service: TicketService
 
   beforeEach(() => {
-    repo = new TicketRepository()
-    service = new TicketService(repo)
+    jest.clearAllMocks()
+    eventBus = new EventBus()
+    service = new TicketService(eventBus)
   })
 
-  test('should create a ticket with sequential number', async () => {
-    const t1 = await service.createTicket({
-      subject: 'Card Issue',
-      description: 'Card not working',
+  test('create cria ticket e emite evento', async () => {
+    const publish = jest.spyOn(eventBus, 'publish')
+    ;(ticketRepository.create as jest.Mock).mockResolvedValue({
+      id: '1',
+      subject: 'X',
+      teamId: 'T1',
     })
-
-    const t2 = await service.createTicket({
-      subject: 'Loan Request',
-      description: 'Need money',
+    const ticket = await service.create({ subject: 'X', teamId: 'T1' })
+    expect(ticket.id).toBe('1')
+    expect(publish).toHaveBeenCalledWith('ticket.created', {
+      id: '1',
+      teamId: 'T1',
     })
-
-    expect(t1.number).toBe(1)
-    expect(t2.number).toBe(2)
   })
 
-  test('should list all tickets', async () => {
-    await service.createTicket({ subject: 'Test 1', description: 'Desc 1' })
-    await service.createTicket({ subject: 'Test 2', description: 'Desc 2' })
-
-    const list = await service.listTickets()
-    expect(list).toHaveLength(2)
+  test('listQueue retorna tickets da fila', async () => {
+    ;(ticketRepository.listQueue as jest.Mock).mockResolvedValue([{ id: '1' }])
+    const result = await service.listQueue()
+    expect(result).toEqual([{ id: '1' }])
+    expect(ticketRepository.listQueue).toHaveBeenCalled()
   })
 
-  test('should return only queued tickets in order', async () => {
-    await service.createTicket({ subject: 'A', description: 'A' })
-    await service.createTicket({ subject: 'B', description: 'B' })
-    await service.createTicket({ subject: 'C', description: 'C' })
-
-    const queued = await service.listQueued()
-
-    expect(queued.length).toBe(3)
-    expect(queued[0].number).toBe(1)
-    expect(queued[2].number).toBe(3)
+  test('getUnassigned retorna tickets não atribuídos', async () => {
+    ;(ticketRepository.getUnassigned as jest.Mock).mockResolvedValue([
+      { id: '2' },
+    ])
+    const result = await service.getUnassigned()
+    expect(result).toEqual([{ id: '2' }])
+    expect(ticketRepository.getUnassigned).toHaveBeenCalled()
   })
 
-  test('should assign a ticket', async () => {
-    const t = await service.createTicket({ subject: 'A', description: 'A' })
-
-    const assigned = await service.assignTicket(t.id, faker.string.uuid())
-
-    expect(assigned?.status).toBe('assigned')
+  test('returnToQueue chama método do repositório', async () => {
+    const spy = jest.spyOn(ticketRepository, 'returnToQueue' as any)
+    await service.returnToQueue('1')
+    expect(spy).toHaveBeenCalledWith('1')
   })
 
-  test('should close a ticket', async () => {
-    const t = await service.createTicket({ subject: 'A', description: 'A' })
-
-    const closed = await service.closeTicket(t.id)
-
-    expect(closed?.status).toBe('closed')
+  test('assign lança erro se ticket não existe', async () => {
+    ;(ticketRepository.update as jest.Mock).mockResolvedValue(null)
+    await expect(service.assign('X', 'A2')).rejects.toThrow('Ticket not found')
   })
 
-  test('assign should return null for non-existent ticket', async () => {
-    const res = await service.assignTicket('unknown', faker.string.uuid())
-    expect(res).toBeNull()
+  test('assign atribui ticket e emite evento', async () => {
+    const publish = jest.spyOn(eventBus, 'publish')
+    ;(ticketRepository.update as jest.Mock).mockResolvedValue({ id: '3' })
+    const ticket = await service.assign('3', 'A1')
+    expect(ticket.id).toBe('3')
+    expect(ticketRepository.update).toHaveBeenCalledWith('3', {
+      agentId: 'A1',
+      status: 'assigned',
+    })
+    expect(publish).toHaveBeenCalledWith('ticket.assigned', {
+      ticketId: '3',
+      agentId: 'A1',
+    })
   })
 
-  test('close should return null for non-existent ticket', async () => {
-    const res = await service.closeTicket('unknown')
-    expect(res).toBeNull()
+  test('unassignAgent desatribui e emite evento', async () => {
+    const publish = jest.spyOn(eventBus, 'publish')
+    ;(ticketRepository.unassignFromAgent as jest.Mock).mockResolvedValue([
+      '4',
+      '5',
+    ])
+    const freed = await service.unassignAgent('A3')
+    expect(freed).toEqual(['4', '5'])
+    expect(ticketRepository.unassignFromAgent).toHaveBeenCalledWith('A3')
+    expect(publish).toHaveBeenCalledWith('agent.removed', {
+      agentId: 'A3',
+      freedTickets: ['4', '5'],
+    })
   })
 })

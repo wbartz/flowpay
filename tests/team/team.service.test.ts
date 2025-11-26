@@ -1,4 +1,4 @@
-import { TeamService } from '@/modules/team/team.service'
+import { teamService } from '@/modules/team/team.service'
 import { teamRepository } from '@/modules/team/team.repository'
 
 jest.mock('../../src/modules/team/team.repository', () => ({
@@ -11,11 +11,8 @@ jest.mock('../../src/modules/team/team.repository', () => ({
 }))
 
 describe('TeamService', () => {
-  let service: TeamService
-
   beforeEach(() => {
     jest.clearAllMocks()
-    service = new TeamService()
   })
 
   test('cria time', async () => {
@@ -26,7 +23,7 @@ describe('TeamService', () => {
       agents: [],
     })
 
-    const team = await service.create({ name: 'Time A', type: 'card' })
+    const team = await teamService.create({ name: 'Time A', type: 'card' })
     expect(team?.type).toBe('card')
     expect(team?.name).toBe('Time A')
   })
@@ -45,7 +42,7 @@ describe('TeamService', () => {
       agents: [],
     })
 
-    const team = await service.update('team1', { name: 'Time B' })
+    const team = await teamService.update('team1', { name: 'Time B' })
     expect(team?.name).toBe('Time B')
   })
 })
