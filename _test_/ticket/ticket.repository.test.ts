@@ -8,12 +8,8 @@ describe('TicketRepository', () => {
   >
 
   beforeEach(() => {
-    // Limpa estado interno
-    // @ts-ignore
     ticketRepository.tickets?.clear()
-    // @ts-ignore
     ticketRepository.queue = []
-    // @ts-ignore
     ticketRepository.idCounter = 1
     ticketData = {
       subject: 'Teste',

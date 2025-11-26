@@ -2,9 +2,9 @@ import type { Ticket } from './ticket.entity'
 import crypto from 'crypto'
 
 class TicketRepository {
-  private tickets = new Map<string, Ticket>()
-  private queue: string[] = []
-  private idCounter = 1
+  public tickets = new Map<string, Ticket>()
+  public queue: string[] = []
+  public idCounter = 1
 
   async create(
     data: Omit<
